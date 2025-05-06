@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Category Name | IKS MCQ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      line-height: 1.6;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      /* padding: 20px; */
+      text-align: center;
+      height: 100px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #cccccc;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .progress {
+      flex: 1;
+    }
+
+    .progress span {
+      font-size: 0.9rem;
+    }
+
+    .progress-bar {
+      background-color: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 10px;
+      margin-top: 5px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #007bff;
+      width: 6.66%;
+      transition: width 0.3s;
+    }
+
+    .score {
+      font-weight: bold;
+    }
+
+    .question-container h2 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .option {
+      padding: 12px;
+      background-color: #1f1f1f;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+
+    .option:hover {
+      background-color: #2a2a2a;
+    }
+
+    .option:disabled {
+      opacity: 1;
+    }
+
+    .correct {
+      background-color: #2e7d32;
+      border-color: #2e7d32;
+    }
+
+    .incorrect {
+      background-color: #c62828;
+      border-color: #c62828;
+    }
+
+    #explanation {
+      background-color: #1e1e1e;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .nav-btn {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .nav-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .nav-btn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
+    .quiz-results {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .result-card {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    #final-score {
+      font-size: 1.5rem;
+      color: #4caf50;
+    }
+
+    .result-actions {
+      margin-top: 20px;
+    }
+
+    .result-actions button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #retry-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #home-btn {
+      background-color: #333;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      background-color: #1f1f1f;
+      color: #999;
+      text-align: center;
+      padding: 15px;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <h1>IKS</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="quiz-header">
+      <div class="progress">
+        <span>Question <span id="current-q">1</span> of <span id="total-q">15</span></span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 6.66%"></div>
+        </div>
+      </div>
+      <div class="score">
+        Score: <span id="score">0</span>
+      </div>
+    </div>
+
+    <div class="quiz-container">
+      <div class="question-container">
+        <h2 id="question">Question text goes here?</h2>
+        <div class="options">
+          <button class="option">Option 1</button>
+          <button class="option">Option 2</button>
+          <button class="option">Option 3</button>
+          <button class="option">Option 4</button>
+        </div>
+        <div id="explanation"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button id="prev-btn" class="nav-btn" disabled>Previous</button>
+        <button id="next-btn" class="nav-btn" disabled>Next</button>
+      </div>
+    </div>
+
+    <div class="quiz-results hidden">
+      <h2>Quiz Completed!</h2>
+      <div class="result-card">
+        <p>Your Score: <span id="final-score">0</span>/<span id="max-score">0</span></p>
+        <p id="result-message"></p>
+        <div class="result-actions">
+          <button id="retry-btn">Retry Quiz</button>
+          <button id="home-btn">Back to Home</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>by Rk</p>
+    </div>
+  </footer>
+
+  <script src="quiz.js"></script>
+</body>
+</html>
