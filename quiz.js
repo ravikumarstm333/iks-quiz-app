@@ -1193,6 +1193,8 @@ const percentageEl = document.getElementById('percentage');
 const retryBtn = document.getElementById('retry-btn');
 const homeBtn = document.getElementById('home-btn');
 const quizTitleEl = document.getElementById('quiz-title');
+const questionNavigatorEl = document.getElementById('question-navigator');
+const questionListPopup = document.getElementById('question-list-popup');
 
 // Quiz State
 let currentQuestion = 0;
@@ -1408,6 +1410,7 @@ submitBtn.addEventListener('click', () => {
   }
 });
 
+
 retryBtn.addEventListener('click', () => {
   currentQuestion = 0;
   score = 0;
@@ -1421,6 +1424,37 @@ retryBtn.addEventListener('click', () => {
 
 homeBtn.addEventListener('click', () => {
   window.location.href = 'index.html';
+});
+
+questionNavigatorEl.addEventListener('click', () => {
+  if (questionListPopup.classList.contains('hidden')) {
+    renderQuestionList();
+    questionListPopup.classList.remove('hidden');
+  } else {
+    questionListPopup.classList.add('hidden');
+  }
+});
+
+// Render question buttons dynamically
+function renderQuestionList() {
+  questionListPopup.innerHTML = ''; // Clear existing
+  shuffledQuestions.forEach((_, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = `Question ${index + 1}`;
+    btn.addEventListener('click', () => {
+      currentQuestion = index;
+      showQuestion();
+      questionListPopup.classList.add('hidden');
+    });
+    questionListPopup.appendChild(btn);
+  });
+}
+
+// Close popup when clicked outside
+document.addEventListener('click', function (event) {
+  if (!questionListPopup.contains(event.target) && !questionNavigatorEl.contains(event.target)) {
+    questionListPopup.classList.add('hidden');
+  }
 });
 
 // Initialize the quiz

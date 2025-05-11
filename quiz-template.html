@@ -370,6 +370,153 @@
         width: 100%;
       }
     }
+    /* Base Navigator Text Style */
+.navigator-text {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #2563eb; /* blue-600 */
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: inline-block;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.navigator-text:hover {
+  color: #fab907; /* blue-700 */
+  
+  text-decoration: none;
+  width: 30%;
+}
+
+/* Question Popup Container */
+.question-popup {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 12px 0;
+  z-index: 100;
+  max-height: 400px;
+  width: 280px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* Popup Scrollbar Styling */
+.question-popup::-webkit-scrollbar {
+  width: 8px;
+}
+
+.question-popup::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 0 10px 10px 0;
+}
+
+.question-popup::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.question-popup::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Question Buttons */
+.question-popup button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.question-popup button:hover {
+  background-color: #f3f4f6; /* gray-100 */
+  color: #111827; /* gray-900 */
+}
+
+.question-popup button:active {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.question-popup button:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Highlighted/Selected Question */
+.question-popup button.highlighted {
+  background-color: #dbeafe; /* blue-100 */
+  color: #1e40af; /* blue-800 */
+  font-weight: 500;
+}
+
+/* Header for Popup */
+.question-popup-header {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 4px;
+}
+
+/* Search Input */
+.question-popup-search {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.question-popup-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.question-popup-search input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+/* Empty State */
+.question-popup-empty {
+  padding: 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hidden State */
+.hidden {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
   </style>
 </head>
 <body>
@@ -380,17 +527,23 @@
   </header>
 
   <main class="container">
-    <div class="quiz-header">
-      <div class="progress">
-        <span>Question <span id="current-q">1</span> of <span id="total-q">15</span></span>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 6.66%"></div>
-        </div>
-      </div>
-      <div class="score">
-        Score: <span id="score">0</span>
-      </div>
+     <div class="quiz-header">
+    <div class="progress">
+    <span id="question-navigator" class="navigator-text">
+      Questions List<span id="current-q">1</span> of <span id="total-q">15</span>
+    </span>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: 6.66%"></div>
     </div>
+  </div>
+  <div class="score">
+    Score: <span id="score">0</span>
+  </div>
+</div>
+
+<!-- Question List Popup -->
+<div id="question-list-popup" class="question-popup hidden"></div>
+
 
     <div class="quiz-container">
       <div class="question-container">
