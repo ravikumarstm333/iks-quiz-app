@@ -3,90 +3,268 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IKS Practice</title>
+  <title>IKS MCQ</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      text-align: center;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f8f9fa;
+      line-height: 1.6;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background-attachment: fixed;
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     /* Navbar */
     nav {
-      background-color: #1f1f1f;
+      background: rgba(25, 25, 45, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       color: white;
-      padding: 15px 30px;
+      padding: 15px 5%;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .nav-logo {
-      font-size: 1.5rem;
-      font-weight: bold;
+      font-size: 1.4rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
     }
 
     .nav-links a {
-      color: white;
+      color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
-      margin-left: 20px;
-      font-size: 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 5px 0;
+      position: relative;
     }
 
     .nav-links a:hover {
-      text-decoration: underline;
+      color: white;
     }
 
-    /* Content */
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    /* Main Content */
     .main-content {
+      padding: 40px 5%;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: calc(100vh - 70px);
-      padding: 30px;
     }
 
     .main-content img {
       width: 150px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      filter: drop-shadow(0 5px 15px rgba(0, 242, 254, 0.3));
+      transition: transform 0.5s ease;
+    }
+
+    .main-content img:hover {
+      transform: scale(1.05) rotate(-5deg);
     }
 
     h1 {
       font-size: 2.5rem;
-      color: #ffffff;
+      margin-bottom: 20px;
+      background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 242, 254, 0.2);
     }
 
     p {
-      font-size: 1.2rem;
-      color: #cccccc;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 40px;
       max-width: 600px;
-      margin: 20px 0 30px 0;
     }
 
-    .btn {
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      background-color: #007bff;
+    /* Mode Selector */
+    .mode-selector {
+      display: flex;
+      gap: 25px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .mode-btn {
+      padding: 18px 30px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.1);
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.4s ease;
+      min-width: 250px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
     }
 
-    .btn:hover {
-      background-color: #0056b3;
+    .mode-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%);
+      z-index: -1;
+      transition: opacity 0.4s ease;
+      opacity: 0;
+    }
+
+    .mode-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 242, 254, 0.3);
+    }
+
+    .mode-btn:hover::before {
+      opacity: 1;
+    }
+
+    /* Animated Background Elements */
+    .bg-elements {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .bg-element {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(79, 172, 254, 0.1);
+      filter: blur(60px);
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      nav {
+        padding: 15px 20px;
+      }
+      
+      .nav-links {
+        gap: 15px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      p {
+        font-size: 1rem;
+      }
+      
+      .mode-btn {
+        padding: 15px 20px;
+        font-size: 1rem;
+        min-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-logo {
+        font-size: 1.2rem;
+      }
+      
+      .nav-links {
+        gap: 10px;
+      }
+      
+      .main-content img {
+        width: 120px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .mode-selector {
+        gap: 15px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Animated Background Elements -->
+  <div class="bg-elements">
+    <div class="bg-element" style="width: 300px; height: 300px; top: 10%; left: 5%;"></div>
+    <div class="bg-element" style="width: 400px; height: 400px; bottom: 15%; right: 10%;"></div>
+    <div class="bg-element" style="width: 250px; height: 250px; top: 50%; left: 30%;"></div>
+  </div>
 
   <!-- Navbar -->
   <nav>
@@ -102,8 +280,40 @@
   <div class="main-content">
     <img src="https://iksindia.org/images/ikslogo.png" alt="IKS Logo" />
     <h1>Indian Knowledge System</h1>
-    <button class="btn" onclick="location.href='quiz-template.html'">Start Practice</button>
+    <p>Explore the ancient wisdom of India through interactive learning</p>
+    <div class="mode-selector">
+      <button class="mode-btn" onclick="location.href='quiz-template.html?mode=practice'">Practice Mode</button>
+      <button class="mode-btn" onclick="location.href='quiz-template.html?mode=mock'">Mock Test (30 Questions)</button>
+    </div>
   </div>
 
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>by Rk | © 2023 IKS MCQ</p>
+    </div>
+  </footer>
+
+  <script>
+    // Create more background elements dynamically
+    document.addEventListener('DOMContentLoaded', function() {
+      const bgElements = document.querySelector('.bg-elements');
+      for (let i = 0; i < 5; i++) {
+        const element = document.createElement('div');
+        element.className = 'bg-element';
+        const size = Math.random() * 200 + 100;
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100;
+        const opacity = Math.random() * 0.1 + 0.05;
+        element.style.width = `${size}px`;
+        element.style.height = `${size}px`;
+        element.style.top = `${posY}%`;
+        element.style.left = `${posX}%`;
+        element.style.background = `rgba(79, 172, 254, ${opacity})`;
+        element.style.animation = `float ${Math.random() * 10 + 10}s infinite ease-in-out`;
+        bgElements.appendChild(element);
+      }
+    });
+  </script>
 </body>
 </html>

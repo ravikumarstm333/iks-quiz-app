@@ -1171,7 +1171,6 @@ const quizData = [
     }
 ];
 
-// Rest of the quiz.js code remains the same as provided earlier
 // DOM Elements
 const questionEl = document.getElementById('question');
 const optionsEl = document.querySelector('.options');
@@ -1189,49 +1188,138 @@ const maxScoreEl = document.getElementById('max-score');
 const resultMessageEl = document.getElementById('result-message');
 const retryBtn = document.getElementById('retry-btn');
 const homeBtn = document.getElementById('home-btn');
+const questionNavEl = document.querySelector('.question-navigator');
+const navGridEl = document.querySelector('.nav-grid');
+const toggleNavBtn = document.querySelector('.toggle-nav');
 
 // Quiz State
 let currentQuestion = 0;
 let score = 0;
 let selectedOption = null;
+let quizMode = 'practice';
+let shuffledQuestions = [];
+let userAnswers = [];
 
+// Initialize Quiz
 function initQuiz() {
-    totalQEl.textContent = quizData.length;
+    // Get mode from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    quizMode = urlParams.get('mode') || 'practice';
+    
+    if (quizMode === 'mock') {
+        // Shuffle and select 30 questions
+        shuffledQuestions = [...quizData].sort(() => 0.5 - Math.random()).slice(0, 30);
+        totalQEl.textContent = 30;
+    } else {
+        shuffledQuestions = [...quizData];
+        totalQEl.textContent = quizData.length;
+    }
+    
+    // Initialize user answers array
+    userAnswers = new Array(shuffledQuestions.length).fill(null);
+    
+    createQuestionNav();
     showQuestion();
+    
+    // Add toggle functionality
+    toggleNavBtn.addEventListener('click', toggleQuestionNav);
 }
 
-// Show Question
+// Create Question Navigation
+function createQuestionNav() {
+    navGridEl.innerHTML = '';
+    shuffledQuestions.forEach((_, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = index + 1;
+        btn.classList.add('q-nav-btn');
+        btn.addEventListener('click', () => navigateToQuestion(index));
+        navGridEl.appendChild(btn);
+    });
+}
+
+// Toggle Question Navigator Visibility
+function toggleQuestionNav() {
+    questionNavEl.classList.toggle('hidden');
+    toggleNavBtn.textContent = questionNavEl.classList.contains('hidden') ? 
+        'Show Question Navigator' : 'Hide Question Navigator';
+}
+
+// Navigate to Specific Question
+function navigateToQuestion(index) {
+    if (index >= 0 && index < shuffledQuestions.length) {
+        currentQuestion = index;
+        showQuestion();
+    }
+}
+
+// Show Current Question
 function showQuestion() {
-    const question = quizData[currentQuestion];
+    const question = shuffledQuestions[currentQuestion];
     questionEl.textContent = question.question;
     optionsEl.innerHTML = '';
     explanationEl.textContent = '';
     selectedOption = null;
 
+    // Populate options
     question.options.forEach((option, index) => {
         const button = document.createElement('button');
         button.textContent = option;
         button.classList.add('option');
+        
+        // If already answered, show the selection
+        if (userAnswers[currentQuestion] !== null) {
+            button.disabled = true;
+            if (userAnswers[currentQuestion] === index) {
+                if (index === question.answer) {
+                    button.classList.add('correct');
+                } else {
+                    button.classList.add('incorrect');
+                }
+            }
+            if (index === question.answer) {
+                button.classList.add('correct');
+            }
+        }
+        
         button.addEventListener('click', () => selectOption(index));
         optionsEl.appendChild(button);
     });
 
+    // Update question counter
     currentQEl.textContent = currentQuestion + 1;
+    
+    // Update progress bar
     updateProgress();
+    
+    // Update navigation buttons
+    updateNavButtons();
+    
+    // Update question navigator
+    updateQuestionNav();
+    
+    // Show explanation if already answered
+    if (userAnswers[currentQuestion] !== null) {
+        explanationEl.textContent = question.explanation;
+        nextBtn.disabled = false;
+    } else {
+        nextBtn.disabled = true;
+    }
     
     // Disable prevBtn if on first question
     prevBtn.disabled = currentQuestion === 0;
-    nextBtn.disabled = true;
 }
 
 // Select Option
 function selectOption(index) {
     selectedOption = index;
     const options = document.querySelectorAll('.option');
-    const correctIndex = quizData[currentQuestion].answer;
+    const correctIndex = shuffledQuestions[currentQuestion].answer;
     
     // Disable all options after selection
     options.forEach(option => option.disabled = true);
+    
+    // Store user answer
+    userAnswers[currentQuestion] = index;
     
     // Highlight selected option
     if (index === correctIndex) {
@@ -1244,36 +1332,50 @@ function selectOption(index) {
     }
     
     // Show explanation
-    explanationEl.textContent = quizData[currentQuestion].explanation;
+    explanationEl.textContent = shuffledQuestions[currentQuestion].explanation;
     nextBtn.disabled = false;
+    
+    // Update question navigator
+    updateQuestionNav();
 }
 
-// Next Question
-nextBtn.addEventListener('click', () => {
-    if (currentQuestion < quizData.length - 1) {
-        currentQuestion++;
-        showQuestion();
-    } else {
-        showResults();
-    }
-});
+// Update Navigation Buttons
+function updateNavButtons() {
+    prevBtn.disabled = currentQuestion === 0;
+    nextBtn.disabled = currentQuestion === shuffledQuestions.length - 1 || 
+                      (userAnswers[currentQuestion] === null && selectedOption === null);
+}
 
-// Previous Question
-prevBtn.addEventListener('click', () => {
-    if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion();
-    }
-});
+// Update Question Navigator
+function updateQuestionNav() {
+    const navButtons = document.querySelectorAll('.q-nav-btn');
+    navButtons.forEach((btn, index) => {
+        btn.classList.remove('current', 'visited', 'answered');
+        
+        if (index === currentQuestion) {
+            btn.classList.add('current');
+        } else if (userAnswers[index] !== null) {
+            btn.classList.add('answered');
+        } else if (index < currentQuestion) {
+            btn.classList.add('visited');
+        }
+    });
+}
+
+// Update Progress Bar
+function updateProgress() {
+    const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+    progressFillEl.style.width = `${progress}%`;
+}
 
 // Show Results
 function showResults() {
     quizContainer.classList.add('hidden');
     resultsEl.classList.remove('hidden');
     finalScoreEl.textContent = score;
-    maxScoreEl.textContent = quizData.length;
+    maxScoreEl.textContent = shuffledQuestions.length;
 
-    const percentage = (score / quizData.length) * 100;
+    const percentage = (score / shuffledQuestions.length) * 100;
     if (percentage >= 80) {
         resultMessageEl.textContent = 'Excellent! You have deep knowledge of this subject.';
     } else if (percentage >= 60) {
@@ -1285,22 +1387,38 @@ function showResults() {
     }
 }
 
-function updateProgress() {
-    const progress = ((currentQuestion + 1) / quizData.length) * 100;
-    progressFillEl.style.width = `${progress}%`;
-}
+// Event Listeners
+nextBtn.addEventListener('click', () => {
+    if (currentQuestion < shuffledQuestions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+    } else {
+        showResults();
+    }
+});
+
+prevBtn.addEventListener('click', () => {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion();
+    }
+});
 
 retryBtn.addEventListener('click', () => {
     currentQuestion = 0;
     score = 0;
     scoreEl.textContent = score;
+    userAnswers = new Array(shuffledQuestions.length).fill(null);
     quizContainer.classList.remove('hidden');
     resultsEl.classList.add('hidden');
     showQuestion();
+    questionNavEl.classList.add('hidden');
+    toggleNavBtn.textContent = 'Show Question Navigator';
 });
 
 homeBtn.addEventListener('click', () => {
     window.location.href = 'index.html';
 });
 
+// Initialize the quiz
 initQuiz();
