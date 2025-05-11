@@ -1178,19 +1178,21 @@ const currentQEl = document.getElementById('current-q');
 const totalQEl = document.getElementById('total-q');
 const scoreEl = document.getElementById('score');
 const progressFillEl = document.querySelector('.progress-fill');
-const explanationEl = document.getElementById('explanation');
 const nextBtn = document.getElementById('next-btn');
 const prevBtn = document.getElementById('prev-btn');
+const submitBtn = document.getElementById('submit-btn');
 const quizContainer = document.querySelector('.quiz-container');
 const resultsEl = document.querySelector('.quiz-results');
 const finalScoreEl = document.getElementById('final-score');
 const maxScoreEl = document.getElementById('max-score');
 const resultMessageEl = document.getElementById('result-message');
+const totalQuestionsEl = document.getElementById('total-questions');
+const correctAnswersEl = document.getElementById('correct-answers');
+const wrongAnswersEl = document.getElementById('wrong-answers');
+const percentageEl = document.getElementById('percentage');
 const retryBtn = document.getElementById('retry-btn');
 const homeBtn = document.getElementById('home-btn');
-const questionNavEl = document.querySelector('.question-navigator');
-const navGridEl = document.querySelector('.nav-grid');
-const toggleNavBtn = document.querySelector('.toggle-nav');
+const quizTitleEl = document.getElementById('quiz-title');
 
 // Quiz State
 let currentQuestion = 0;
@@ -1199,225 +1201,226 @@ let selectedOption = null;
 let quizMode = 'practice';
 let shuffledQuestions = [];
 let userAnswers = [];
+let showAnswers = false;
 
 // Initialize Quiz
 function initQuiz() {
-    // Get mode from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    quizMode = urlParams.get('mode') || 'practice';
-    
-    if (quizMode === 'mock') {
-        // Shuffle and select 30 questions
-        shuffledQuestions = [...quizData].sort(() => 0.5 - Math.random()).slice(0, 30);
-        totalQEl.textContent = 30;
-    } else {
-        shuffledQuestions = [...quizData];
-        totalQEl.textContent = quizData.length;
-    }
-    
-    // Initialize user answers array
-    userAnswers = new Array(shuffledQuestions.length).fill(null);
-    
-    createQuestionNav();
-    showQuestion();
-    
-    // Add toggle functionality
-    toggleNavBtn.addEventListener('click', toggleQuestionNav);
-}
-
-// Create Question Navigation
-function createQuestionNav() {
-    navGridEl.innerHTML = '';
-    shuffledQuestions.forEach((_, index) => {
-        const btn = document.createElement('button');
-        btn.textContent = index + 1;
-        btn.classList.add('q-nav-btn');
-        btn.addEventListener('click', () => navigateToQuestion(index));
-        navGridEl.appendChild(btn);
-    });
-}
-
-// Toggle Question Navigator Visibility
-function toggleQuestionNav() {
-    questionNavEl.classList.toggle('hidden');
-    toggleNavBtn.textContent = questionNavEl.classList.contains('hidden') ? 
-        'Show Question Navigator' : 'Hide Question Navigator';
-}
-
-// Navigate to Specific Question
-function navigateToQuestion(index) {
-    if (index >= 0 && index < shuffledQuestions.length) {
-        currentQuestion = index;
-        showQuestion();
-    }
+  // Get mode from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  quizMode = urlParams.get('mode') || 'practice';
+  
+  if (quizMode === 'mock') {
+    // Shuffle and select 30 questions for mock test
+    shuffledQuestions = [...quizData].sort(() => 0.5 - Math.random()).slice(0, 30);
+    totalQEl.textContent = 30;
+    quizTitleEl.textContent = "IKS Mock Test";
+    submitBtn.style.display = "flex";
+    nextBtn.textContent = "Next";
+  } else {
+    // Practice mode shows all questions
+    shuffledQuestions = [...quizData];
+    totalQEl.textContent = quizData.length;
+    quizTitleEl.textContent = "IKS Practice";
+    submitBtn.style.display = "none";
+    nextBtn.textContent = "Next";
+  }
+  
+  // Initialize user answers array
+  userAnswers = new Array(shuffledQuestions.length).fill(null);
+  
+  showQuestion();
 }
 
 // Show Current Question
 function showQuestion() {
-    const question = shuffledQuestions[currentQuestion];
-    questionEl.textContent = question.question;
-    optionsEl.innerHTML = '';
-    explanationEl.textContent = '';
-    selectedOption = null;
+  const question = shuffledQuestions[currentQuestion];
+  questionEl.textContent = question.question;
+  optionsEl.innerHTML = '';
+  selectedOption = null;
 
-    // Populate options
-    question.options.forEach((option, index) => {
-        const button = document.createElement('button');
-        button.textContent = option;
-        button.classList.add('option');
-        
-        // If already answered, show the selection
-        if (userAnswers[currentQuestion] !== null) {
-            button.disabled = true;
-            if (userAnswers[currentQuestion] === index) {
-                if (index === question.answer) {
-                    button.classList.add('correct');
-                } else {
-                    button.classList.add('incorrect');
-                }
-            }
-            if (index === question.answer) {
-                button.classList.add('correct');
-            }
+  // Populate options
+  question.options.forEach((option, index) => {
+    const button = document.createElement('button');
+    button.textContent = option;
+    button.classList.add('option');
+    
+    // If in review mode after submission, show correct/incorrect answers
+    if (showAnswers) {
+      button.disabled = true;
+      if (userAnswers[currentQuestion] === index) {
+        if (index === question.answer) {
+          button.classList.add('correct');
+        } else {
+          button.classList.add('incorrect');
         }
-        
-        button.addEventListener('click', () => selectOption(index));
-        optionsEl.appendChild(button);
-    });
-
-    // Update question counter
-    currentQEl.textContent = currentQuestion + 1;
-    
-    // Update progress bar
-    updateProgress();
-    
-    // Update navigation buttons
-    updateNavButtons();
-    
-    // Update question navigator
-    updateQuestionNav();
-    
-    // Show explanation if already answered
-    if (userAnswers[currentQuestion] !== null) {
-        explanationEl.textContent = question.explanation;
-        nextBtn.disabled = false;
-    } else {
-        nextBtn.disabled = true;
+      }
+      if (index === question.answer) {
+        button.classList.add('correct');
+      }
+    } else if (userAnswers[currentQuestion] !== null && userAnswers[currentQuestion] === index) {
+      // In test mode, show selected answer but don't reveal correctness
+      button.style.backgroundColor = "rgba(56, 189, 248, 0.2)";
+      button.style.borderColor = "rgba(56, 189, 248, 0.5)";
     }
     
-    // Disable prevBtn if on first question
-    prevBtn.disabled = currentQuestion === 0;
+    button.addEventListener('click', () => selectOption(index));
+    optionsEl.appendChild(button);
+  });
+
+  // Update question counter
+  currentQEl.textContent = currentQuestion + 1;
+  
+  // Update progress bar
+  updateProgress();
+  
+  // Update navigation buttons
+  updateNavButtons();
 }
 
 // Select Option
 function selectOption(index) {
-    selectedOption = index;
-    const options = document.querySelectorAll('.option');
-    const correctIndex = shuffledQuestions[currentQuestion].answer;
-    
-    // Disable all options after selection
+  const options = document.querySelectorAll('.option');
+  const correctIndex = shuffledQuestions[currentQuestion].answer;
+  
+  // Remove previous selection if any
+  options.forEach(opt => {
+    opt.style.backgroundColor = "";
+    opt.style.borderColor = "";
+  });
+  
+  // Highlight new selection
+  options[index].style.backgroundColor = "rgba(56, 189, 248, 0.2)";
+  options[index].style.borderColor = "rgba(56, 189, 248, 0.5)";
+  
+  // Store user answer
+  userAnswers[currentQuestion] = index;
+  
+  // In practice mode, show immediate feedback
+  if (quizMode === 'practice') {
     options.forEach(option => option.disabled = true);
-    
-    // Store user answer
-    userAnswers[currentQuestion] = index;
-    
-    // Highlight selected option
     if (index === correctIndex) {
-        options[index].classList.add('correct');
-        score++;
-        scoreEl.textContent = score;
+      options[index].classList.add('correct');
+      score++;
+      scoreEl.textContent = score;
     } else {
-        options[index].classList.add('incorrect');
-        options[correctIndex].classList.add('correct');
+      options[index].classList.add('incorrect');
+      options[correctIndex].classList.add('correct');
     }
-    
-    // Show explanation
-    explanationEl.textContent = shuffledQuestions[currentQuestion].explanation;
-    nextBtn.disabled = false;
-    
-    // Update question navigator
-    updateQuestionNav();
+  } else {
+    // In mock test mode, just count score but don't show it yet
+    if (index === correctIndex) {
+      score++;
+      scoreEl.textContent = score;
+    }
+  }
+  
+  updateNavButtons();
 }
 
 // Update Navigation Buttons
 function updateNavButtons() {
-    prevBtn.disabled = currentQuestion === 0;
-    nextBtn.disabled = currentQuestion === shuffledQuestions.length - 1 || 
-                      (userAnswers[currentQuestion] === null && selectedOption === null);
-}
-
-// Update Question Navigator
-function updateQuestionNav() {
-    const navButtons = document.querySelectorAll('.q-nav-btn');
-    navButtons.forEach((btn, index) => {
-        btn.classList.remove('current', 'visited', 'answered');
-        
-        if (index === currentQuestion) {
-            btn.classList.add('current');
-        } else if (userAnswers[index] !== null) {
-            btn.classList.add('answered');
-        } else if (index < currentQuestion) {
-            btn.classList.add('visited');
-        }
-    });
+  prevBtn.disabled = currentQuestion === 0;
+  
+  if (currentQuestion === shuffledQuestions.length - 1) {
+    if (quizMode === 'mock') {
+      nextBtn.style.display = 'none';
+      submitBtn.style.display = 'flex';
+    } else {
+      nextBtn.textContent = 'Finish';
+    }
+  } else {
+    nextBtn.style.display = 'flex';
+    submitBtn.style.display = 'none';
+    nextBtn.textContent = 'Next';
+  }
+  
+  // Enable next button in mock test mode regardless of selection
+  if (quizMode === 'mock') {
+    nextBtn.disabled = false;
+  } else {
+    nextBtn.disabled = userAnswers[currentQuestion] === null;
+  }
 }
 
 // Update Progress Bar
 function updateProgress() {
-    const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
-    progressFillEl.style.width = `${progress}%`;
+  const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+  progressFillEl.style.width = `${progress}%`;
 }
 
-// Show Results
+// Calculate and Show Results
 function showResults() {
-    quizContainer.classList.add('hidden');
-    resultsEl.classList.remove('hidden');
-    finalScoreEl.textContent = score;
-    maxScoreEl.textContent = shuffledQuestions.length;
-
-    const percentage = (score / shuffledQuestions.length) * 100;
-    if (percentage >= 80) {
-        resultMessageEl.textContent = 'Excellent! You have deep knowledge of this subject.';
-    } else if (percentage >= 60) {
-        resultMessageEl.textContent = 'Good! You have substantial knowledge but can learn more.';
-    } else if (percentage >= 40) {
-        resultMessageEl.textContent = 'Fair! Keep learning to improve your understanding.';
-    } else {
-        resultMessageEl.textContent = 'Keep practicing! The ancient wisdom awaits your discovery.';
-    }
+  quizContainer.classList.add('hidden');
+  resultsEl.classList.remove('hidden');
+  
+  const totalQuestions = shuffledQuestions.length;
+  const correctAnswers = score;
+  const wrongAnswers = totalQuestions - correctAnswers;
+  const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+  
+  finalScoreEl.textContent = correctAnswers;
+  maxScoreEl.textContent = totalQuestions;
+  totalQuestionsEl.textContent = totalQuestions;
+  correctAnswersEl.textContent = correctAnswers;
+  wrongAnswersEl.textContent = wrongAnswers;
+  percentageEl.textContent = percentage;
+  
+  if (percentage >= 80) {
+    resultMessageEl.textContent = 'Excellent! You have excellent knowledge of IKS.';
+  } else if (percentage >= 60) {
+    resultMessageEl.textContent = 'Good! You have good understanding but can improve more.';
+  } else if (percentage >= 40) {
+    resultMessageEl.textContent = 'Average! Keep practicing to improve your knowledge.';
+  } else {
+    resultMessageEl.textContent = 'Keep learning! The ancient wisdom awaits your discovery.';
+  }
+  
+  showAnswers = true;
 }
 
 // Event Listeners
 nextBtn.addEventListener('click', () => {
-    if (currentQuestion < shuffledQuestions.length - 1) {
-        currentQuestion++;
-        showQuestion();
-    } else {
-        showResults();
-    }
+  if (currentQuestion < shuffledQuestions.length - 1) {
+    currentQuestion++;
+    showQuestion();
+  } else if (quizMode === 'practice') {
+    showResults();
+  }
 });
 
 prevBtn.addEventListener('click', () => {
-    if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion();
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    showQuestion();
+  }
+});
+
+submitBtn.addEventListener('click', () => {
+  // Check if all questions are answered
+  const unanswered = userAnswers.filter(answer => answer === null).length;
+  
+  if (unanswered > 0) {
+    if (confirm(`You have ${unanswered} unanswered questions. Submit anyway?`)) {
+      showResults();
     }
+  } else {
+    showResults();
+  }
 });
 
 retryBtn.addEventListener('click', () => {
-    currentQuestion = 0;
-    score = 0;
-    scoreEl.textContent = score;
-    userAnswers = new Array(shuffledQuestions.length).fill(null);
-    quizContainer.classList.remove('hidden');
-    resultsEl.classList.add('hidden');
-    showQuestion();
-    questionNavEl.classList.add('hidden');
-    toggleNavBtn.textContent = 'Show Question Navigator';
+  currentQuestion = 0;
+  score = 0;
+  scoreEl.textContent = score;
+  userAnswers = new Array(shuffledQuestions.length).fill(null);
+  showAnswers = false;
+  quizContainer.classList.remove('hidden');
+  resultsEl.classList.add('hidden');
+  showQuestion();
 });
 
 homeBtn.addEventListener('click', () => {
-    window.location.href = 'index.html';
+  window.location.href = 'index.html';
 });
 
 // Initialize the quiz

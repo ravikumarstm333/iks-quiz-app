@@ -105,11 +105,6 @@
       gap: 5px;
     }
 
-    .score::before {
-      content: '★';
-      color: #fbbf24;
-    }
-
     /* Question Container */
     .question-container {
       background: rgba(30, 41, 59, 0.7);
@@ -172,41 +167,6 @@
       opacity: 1;
     }
 
-    .correct {
-      background: rgba(22, 163, 74, 0.2);
-      border-color: rgba(22, 163, 74, 0.5);
-    }
-
-    .correct::before {
-      background: #16a34a;
-      width: 8px;
-    }
-
-    .incorrect {
-      background: rgba(220, 38, 38, 0.2);
-      border-color: rgba(220, 38, 38, 0.5);
-    }
-
-    .incorrect::before {
-      background: #dc2626;
-      width: 8px;
-    }
-
-    #explanation {
-      background: rgba(15, 23, 42, 0.7);
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
-      font-size: 0.95rem;
-      border-left: 4px solid #818cf8;
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     /* Navigation Buttons */
     .nav-buttons {
       display: flex;
@@ -250,88 +210,22 @@
       box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
     }
 
+    #submit-btn {
+      background: linear-gradient(to right, #f59e0b, #ef4444);
+      color: white;
+      display: none;
+    }
+
+    #submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
     .nav-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
-    }
-
-    /* Question Navigator */
-    .question-navigator {
-      margin: 25px 0;
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(5px);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      animation: slideUp 0.4s ease;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .toggle-nav {
-      background: rgba(15, 23, 42, 0.7);
-      color: #f8fafc;
-      border: none;
-      padding: 12px 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .toggle-nav:hover {
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .nav-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-      gap: 10px;
-    }
-
-    .q-nav-btn {
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #f8fafc;
-      cursor: pointer;
-      font-size: 0.9rem;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    .q-nav-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .q-nav-btn.visited {
-      background: rgba(30, 64, 175, 0.5);
-    }
-
-    .q-nav-btn.current {
-      background: linear-gradient(to right, #38bdf8, #818cf8);
-      color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-    }
-
-    .q-nav-btn.answered {
-      background: rgba(22, 163, 74, 0.5);
     }
 
     /* Results Section */
@@ -371,6 +265,18 @@
       font-size: 1.1rem;
       color: #94a3b8;
       margin-bottom: 20px;
+    }
+
+    .result-details {
+      text-align: left;
+      margin: 20px 0;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .result-actions {
@@ -428,6 +334,11 @@
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 600px) {
       .question-container h2 {
@@ -456,7 +367,7 @@
 <body>
   <header>
     <div class="container">
-      <h1>IKS Quiz</h1>
+      <h1 id="quiz-title">IKS Quiz</h1>
     </div>
   </header>
 
@@ -469,14 +380,8 @@
         </div>
       </div>
       <div class="score">
-        <span id="score">0</span>
+        Score: <span id="score">0</span>
       </div>
-    </div>
-
-    <!-- Question Navigator -->
-    <div class="question-navigator hidden">
-      <button class="toggle-nav">Hide Question Navigator</button>
-      <div class="nav-grid"></div>
     </div>
 
     <div class="quiz-container">
@@ -488,22 +393,43 @@
           <button class="option">Option 3</button>
           <button class="option">Option 4</button>
         </div>
-        <div id="explanation"></div>
       </div>
 
       <div class="nav-buttons">
         <button id="prev-btn" class="nav-btn" disabled>Previous</button>
-        <button id="next-btn" class="nav-btn" disabled>Next</button>
+        <button id="next-btn" class="nav-btn">Next</button>
+        <button id="submit-btn" class="nav-btn">Submit Test</button>
       </div>
     </div>
 
     <div class="quiz-results hidden">
-      <h2>Quiz Completed!</h2>
+      <h2>Test Results</h2>
       <div class="result-card">
-        <p>Your Score: <span id="final-score">0</span>/<span id="max-score">0</span></p>
+        <p>You scored:</p>
+        <span id="final-score">0</span>/<span id="max-score">0</span>
         <p id="result-message"></p>
+        
+        <div class="result-details">
+          <div class="result-item">
+            <span>Total Questions:</span>
+            <span id="total-questions">0</span>
+          </div>
+          <div class="result-item">
+            <span>Correct Answers:</span>
+            <span id="correct-answers">0</span>
+          </div>
+          <div class="result-item">
+            <span>Wrong Answers:</span>
+            <span id="wrong-answers">0</span>
+          </div>
+          <div class="result-item">
+            <span>Percentage:</span>
+            <span id="percentage">0</span>%
+          </div>
+        </div>
+        
         <div class="result-actions">
-          <button id="retry-btn">Retry Quiz</button>
+          <button id="retry-btn">Retry Test</button>
           <button id="home-btn">Back to Home</button>
         </div>
       </div>
